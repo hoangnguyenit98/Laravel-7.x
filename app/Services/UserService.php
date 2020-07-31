@@ -22,8 +22,8 @@ class UserService
             $query->where('age', '<=', (int) $dataSearch['maxAge']);
         }
 
-        if(isset($dataSearch['del_flg'])){
-            $query->where('del_flg', (int)$dataSearch['del_flg']);
+        if (isset($dataSearch['del_flg'])) {
+            $query->where('del_flg', (int) $dataSearch['del_flg']);
         }
 
         return $query->paginate($dataSearch['limit']);
@@ -49,5 +49,11 @@ class UserService
     {
         return User::where('id', $id)
             ->update(['del_flg' => 1]);
+    }
+
+    public function changePassword($id, $password)
+    {
+        return User::where('id', $id)
+            ->update(['password' => $password]);
     }
 }

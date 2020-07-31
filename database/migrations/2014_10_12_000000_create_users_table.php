@@ -17,7 +17,7 @@ class CreateUsersTable extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('age');
+            $table->integer('age');
             $table->string('email')->unique();
             $table->string('password');
             $table->integer('del_flg')->default(0);
@@ -25,8 +25,8 @@ class CreateUsersTable extends Migration
         });
 
         DB::table('users')->insert([
-            ['name' => 'admin', 'age' => '20', 'email' => 'admin@gmail.com', 'password' => '$2y$10$o27VhrkdSnaA5T8mbwKswOul9oej2S9y5pA5XS2d5Sw75u7bryT0G'],
-            ['name' => 'user', 'age' => '20', 'email' => 'user@gmail.com', 'password' => '$2y$10$o27VhrkdSnaA5T8mbwKswOul9oej2S9y5pA5XS2d5Sw75u7bryT0G'],
+            ['name' => 'admin', 'age' => 20, 'email' => 'hoangnguyenit98@gmail.com', 'password' => '$2y$12$JfJzUcbyUnJEQHTm3yJIDu4JLEE.gXfKBA8T6QvYCwsIsI/FxTksG'],
+            ['name' => 'user', 'age' => 20, 'email' => 'hoangnd.it98@gmail.com', 'password' => '$2y$12$JfJzUcbyUnJEQHTm3yJIDu4JLEE.gXfKBA8T6QvYCwsIsI/FxTksG'],
         ]);
     }
 
