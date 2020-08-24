@@ -47,7 +47,7 @@ class UserService
 
     public function delete($id)
     {
-        return User::where('id', $id)
+        return User::where(['id' => $id, 'del_flg' => 0])
             ->update(['del_flg' => 1]);
     }
 

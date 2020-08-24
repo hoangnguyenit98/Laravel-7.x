@@ -26,14 +26,3 @@ Route::resource('user', 'UserController')->except(['create', 'edit']);
 Route::post('user/reset-password', 'UserController@resetPassword');
 Route::post('user/change-password', 'UserController@changePassword');
 Route::post('user/export-csv', 'UserController@exportCsv');
-
-Route::get('send-mail', function () {
-    $details = [
-        'title' => 'Mail from ItSolutionStuff.com',
-        'body' => 'This is for testing email using smtp',
-    ];
-
-    \Mail::to('hoangnguyenit98@gmail.com')->send(new \App\Mail\MyTestMail($details));
-
-    dd("Email is Sent.");
-});

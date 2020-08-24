@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\UsersExport;
 use App\Services\UserService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Validator;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\UsersExport;
+use Validator;
 
 class UserController extends Controller
 {
@@ -16,6 +17,7 @@ class UserController extends Controller
 
     public function __construct(UserService $userService)
     {
+        // $this->middleware('auth.api');
         $this->userService = $userService;
     }
 
@@ -74,8 +76,13 @@ class UserController extends Controller
         }
 
         $data = $validator->validated();
+        $hashPassword = bcrypt('12345678');
         for ($i = 0; $i < count($data); $i++) {
-            $data[$i] = array_merge($data[$i], ['password' => bcrypt('12345678')]);
+            $moreData = [
+                'password' => $hashPassword,
+                'created_at' => Carbon::now(),
+            ];
+            $data[$i] = array_merge($data[$i], $moreData);
         }
 
         $updateStatus = $this->userService->save($data);
@@ -87,7 +94,6 @@ class UserController extends Controller
                 'message' => 'Thêm user thành công.',
                 'payload' => [],
             ]);
-
         }
 
         return response()->json([
@@ -158,7 +164,6 @@ class UserController extends Controller
                 'message' => 'Chỉnh sửa user thành công.',
                 'payload' => [],
             ]);
-
         }
 
         return response()->json([
@@ -185,7 +190,6 @@ class UserController extends Controller
                 'message' => 'Xóa user thành công.',
                 'payload' => [],
             ]);
-
         }
 
         return response()->json([
@@ -214,7 +218,6 @@ class UserController extends Controller
                 'message' => 'Đặt lại mật khẩu thành công. Mật khẩu mới đã được gửi về hòm thư của người dùng.',
                 'payload' => [],
             ]);
-
         }
 
         return response()->json([
@@ -252,7 +255,6 @@ class UserController extends Controller
                     'message' => 'Đổi mật khẩu thành công.',
                     'payload' => [],
                 ]);
-
             }
         }
 
@@ -266,24 +268,34 @@ class UserController extends Controller
 
     public function exportCsv(Request $request)
     {
-        return Excel::download(new UsersExport, 'users.xlsx');
-        // $param = $request->query();
 
-        // $dataSearch = [
-        //     'limit' => $param['limit'] ?? 10,
-        //     'name' => $param['name'] ?? '',
-        //     'minAge' => $param['minAge'] ?? '',
-        //     'maxAge' => $param['maxAge'] ?? '',
-        //     'del_flg' => $param['del_flg'] ?? 0,
-        // ];
+        $requestSearch = $request->all();
 
-        // $users = $this->userService->getAll($dataSearch);
+        $dataSearch = [
+            'limit' => $requestSearch['limit'] ?? 10,
+            'name' => $requestSearch['name'] ?? '',
+            'minAge' => $requestSearch['minAge'] ?? '',
+            'maxAge' => $requestSearch['maxAge'] ?? '',
+            'del_flg' => $requestSearch['del_flg'] ?? 0,
+        ];
 
-        // return response()->json([
-        //     'status' => 'successful',
-        //     'code' => '200',
-        //     'message' => 'Lấy dữ liệu thành công.',
-        //     'payload' => $users,
-        // ]);
+        try {
+            $users = $this->userService->getAll($dataSearch)->toArray();
+            $dataExport[0] = ['ID', 'Email', 'Tên', 'Tuổi', 'Ngày đăng ký', 'Chỉnh sửa gần đây'];
+            $data = $users['data'];
+            foreach ($data as $row) {
+                array_push($dataExport, [$row['id'],$row['email'], $row['name'],$row['age'], Carbon::parse($row['created_at'])->format('d/m/Y H:s'), Carbon::parse($row['updated_at'])->format('d/m/Y H:s')]);
+            }
+            return Excel::download(new UsersExport($dataExport), 'users.csv');
+
+        } catch (\Throwable $th) {
+
+            return response()->json([
+                'status' => 'successful',
+                'code' => '204',
+                'message' => 'Xuất file csv không thành công',
+                'payload' => [],
+            ]);
+        }
     }
 }

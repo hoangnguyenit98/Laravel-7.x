@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\UserService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Validator;
@@ -41,11 +42,14 @@ class JWTAuthController extends Controller
             ]);
         }
 
+        $moreData = [
+            'password' => bcrypt($request->password),
+            'created_at' => Carbon::now(),
+        ];
         $data = array_merge(
             $validator->validated(),
-            ['password' => bcrypt($request->password)]
+            $moreData
         );
-
         $result = $this->userService->save($data);
 
         if ($result) {
